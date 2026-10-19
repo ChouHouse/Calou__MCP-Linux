@@ -32,9 +32,18 @@ JOB_DIR = Path(os.environ.get("MCP_JOB_DIR", "/var/log/mcp-linux/jobs"))
 mcp = FastMCP(
     "MCP-Linux",
     instructions=(
-        "Full root access to a Linux machine. Use `exec` to run shell commands, "
-        "`job_start` for long-running processes, and `read_file` / `write_file` / "
-        "`edit_file` for files. There is no sandbox: be careful with destructive commands."
+        "This is a Debian Linux system running INSIDE a Docker container, with root access "
+        "to the container. Use `exec` to run shell commands, `job_start` for long-running "
+        "processes, and `read_file` / `write_file` / `edit_file` for files. "
+        "Good for: installing packages (apt, pip, npm), building and running applications, "
+        "git, editing files, running servers on local ports. "
+        "NOT possible: anything that needs the Docker host or privileged mode, such as "
+        "running Docker or systemd/systemctl, mounting filesystems, loading kernel modules, "
+        "changing host networking/iptables, or accessing host devices. Do not try these; "
+        "tell the user instead. Only the volumes mounted into the container persist across "
+        "restarts (/root and /ccp/flags); other changes are lost when the container is recreated. "
+        "Default working directory is /root/workspace. There is no extra sandbox inside the "
+        "container, so be careful with destructive commands."
     ),
     host="0.0.0.0",
     port=PORT,

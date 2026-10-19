@@ -3,7 +3,9 @@ Give an AI full control of a Linux machine through [MCP](https://modelcontextpro
 
 Design follows [Remosh](https://github.com/Calou-Code-Platform/remosh): same base image (`ccp-base-debian`), same `run.sh` / flags / `cfd` / auto-startup conventions — but instead of SSH, the container serves an **MCP server** (Streamable HTTP).
 
-> **This container is intentionally unrestricted.** The AI runs as `root`, with no sandbox. With `--privileged` it has the same power as root on the Docker host. Anyone holding your MCP token can do anything. Treat the token like a root password.
+> **This container is intentionally unrestricted.** The AI runs as `root` inside the container, with no extra sandbox. That is enough for normal development (packages, builds, servers, git). Add `--privileged` only if you need docker-in-docker, mounts, FUSE, iptables/VPN or kernel modules; with it, the AI has the same power as root on the Docker host. Anyone holding your MCP token can do anything. Treat the token like a root password.
+>
+> The MCP server tells the AI that it lives in a Docker container and cannot do host-level things, so it will not waste attempts on them unless you enable privileged mode.
 
 ## Tools
 | Tool | What it does |
@@ -31,7 +33,6 @@ Design follows [Remosh](https://github.com/Calou-Code-Platform/remosh): same bas
 docker run -d \
   --name=mcp-linux \
   --restart always \
-  --privileged \
   -e token=your_long_random_token \
   -e cloudflared=your_cloudflared_tunnel_token \
   -p 8000:8000 \
@@ -61,7 +62,7 @@ Optionally put Cloudflare Access in front of the hostname for a second layer.
 Any `*.sh` in `/root/startup` is run in a background tmux session every time the container starts.
 
 ## Going even further
-By default "max permission" means root + `--privileged` inside the container. To let the AI operate the **host** itself, uncomment in `docker-compose.yml`: `pid: host`, `network_mode: host`, and the `/:/host` mount (+ `docker.sock`). Then `chroot /host` gives a root shell on the machine.
+By default the AI is root inside the container. For more power, add `--privileged` (docker-in-docker, mounts, FUSE, iptables). To let the AI operate the **host** itself, also uncomment in `docker-compose.yml`: `pid: host`, `network_mode: host`, and the `/:/host` mount (+ `docker.sock`). Then `chroot /host` gives a root shell on the machine. If you do this, edit the `instructions` string in `server/server.py`, which currently tells the AI that host-level actions are impossible.
 
 ## Development / tests
 ```bash

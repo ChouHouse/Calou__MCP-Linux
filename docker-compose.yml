@@ -3,8 +3,9 @@ services:
     image: ghcr.io/chouhouse/calou__mcp-linux:latest
     container_name: mcp-linux
     restart: always
-    # 最大權限：等同於在主機上以 root 執行 (可存取所有 device、載入 kernel 模組...)
-    privileged: true
+    # 容器內預設就是 root，一般開發 (裝套件、編譯、跑服務) 不需要 privileged。
+    # 需要 docker-in-docker、mount、FUSE、iptables/VPN、kernel 模組時才打開：
+    # privileged: true
     # 如果要讓 AI 直接操作「主機」而不是容器，取消下面的註解：
     # pid: host
     # network_mode: host
