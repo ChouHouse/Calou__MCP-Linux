@@ -1,0 +1,27 @@
+services:
+  mcp-linux:
+    image: ghcr.io/chouhouse/calou__mcp-linux:latest
+    container_name: mcp-linux
+    restart: always
+    # 最大權限：等同於在主機上以 root 執行 (可存取所有 device、載入 kernel 模組...)
+    privileged: true
+    # 如果要讓 AI 直接操作「主機」而不是容器，取消下面的註解：
+    # pid: host
+    # network_mode: host
+    # volumes:
+    #   - /:/host                              # 主機整個檔案系統 (在容器內為 /host)
+    #   - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # MCP 存取密碼 (Bearer token)。不填會自動產生並印在 `docker logs`。
+      token: "change-me-to-a-long-random-string"
+      # (Optional) Cloudflare Tunnel token，Public hostname 指向 http://localhost:8000
+      cloudflared: ""
+    ports:
+      - "8000:8000"
+    volumes:
+      - mcp-flags:/ccp/flags      # 保存 token / cloudflared 設定
+      - mcp-root:/root            # 保存 workspace、startup 與所有安裝的東西
+
+volumes:
+  mcp-flags:
+  mcp-root:
